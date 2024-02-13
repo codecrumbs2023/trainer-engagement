@@ -52,11 +52,20 @@ function BusinessRequestsDetails() {
 
   const handleReject = async (businessId) => {
     try {
-      // Logic to reject the business request
+      // Send a DELETE request to the backend to delete the record
+      await axios.delete(`http://localhost:3001/businessrequests/${businessId}`);
+      
+      // If the deletion is successful, update the state to remove the deleted record
+      setBusinessRequests(prevBusinessRequests =>
+        prevBusinessRequests.filter(request => request._id !== businessId)
+      );
+      
+      console.log("Business request rejected successfully");
     } catch (error) {
       console.error("Error rejecting business request:", error);
     }
   };
+  
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;

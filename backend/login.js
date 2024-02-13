@@ -362,6 +362,28 @@ app.post("/purchase-orders", async (req, res) => {
 });
 
 
+app.delete('/businessrequests/:id', async (req, res) => {
+  const requestId = req.params.id;
+
+  try {
+    // Find the business request record by ID and delete it
+    const deletedRequest = await BusinessRequest.findByIdAndDelete(requestId);
+
+    if (!deletedRequest) {
+      // If the record with the given ID is not found, return a 404 status
+      return res.status(404).json({ message: 'Business request not found' });
+    }
+
+    // If the record is successfully deleted, return a success message
+    res.status(200).json({ message: 'Business request deleted successfully' });
+  } catch (error) {
+    // If an error occurs during deletion, return a 500 status and error message
+    console.error('Error deleting business request:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
