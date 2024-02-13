@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
- 
+
 function BusinessRequestsDetails() {
   const [businessRequests, setBusinessRequests] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const navigate = useNavigate();
- 
+
   useEffect(() => {
     fetchBusinessRequests();
   }, []);
- 
+
   const fetchBusinessRequests = async () => {
     try {
       const response = await axios.get("http://localhost:3001/businessrequests");
@@ -20,12 +20,31 @@ function BusinessRequestsDetails() {
       console.error("Error fetching business requests:", error);
     }
   };
- 
- 
+
+  const calculatePricePerDay = (request) => {
+    const startDate = new Date(request.startDate);
+    const endDate = new Date(request.endDate);
+    const durationInMilliseconds = endDate - startDate;
+    console.log(durationInMilliseconds); // Output: 86400000 (1 day in milliseconds)
+    const durationInDays = durationInMilliseconds / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+    const durationOfTraining = request.durationOfTraining;
+    const trainingBudget = request.trainingBudget;
+    
+    // Ensure duration of training is greater than 0 to avoid division by zero
+    if (durationOfTraining <= 0) {
+      return "Invalid duration";
+    }
+  
+    // Calculate price per day
+    const pricePerDay = trainingBudget / (durationInDays * durationOfTraining);
+    return isNaN(pricePerDay) ? "Invalid price" : pricePerDay.toFixed(2);
+  };
+  
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = businessRequests.slice(indexOfFirstItem, indexOfLastItem);
- 
+
   return (
     <div>
       <h2 className="text-lg font-bold mb-4">Business Requests Details</h2>
@@ -34,11 +53,10 @@ function BusinessRequestsDetails() {
           <tr>
             <th className="p-3 border border-gray-300">Batch Name</th>
             <th className="p-3 border border-gray-300">Technology</th>
-            <th className="p-3 border border-gray-300">Number of Trainees</th>
-            <th className="p-3 border border-gray-300">Duration of Training</th>
             <th className="p-3 border border-gray-300">Start Date</th>
             <th className="p-3 border border-gray-300">End Date</th>
             <th className="p-3 border border-gray-300">Training Budget</th>
+            <th className="p-3 border border-gray-300">Price Per Day</th>
             <th className="p-3 border border-gray-300">Company Name</th>
             <th className="p-3 border border-gray-300">Actions</th>
           </tr>
@@ -48,11 +66,10 @@ function BusinessRequestsDetails() {
             <tr key={request._id} className="bg-white">
               <td className="p-3 border border-gray-300">{request.batchName}</td>
               <td className="p-3 border border-gray-300">{request.technology}</td>
-              <td className="p-3 border border-gray-300">{request.numberOfTrainees}</td>
-              <td className="p-3 border border-gray-300">{request.durationOfTraining}</td>
               <td className="p-3 border border-gray-300">{request.startDate}</td>
               <td className="p-3 border border-gray-300">{request.endDate}</td>
               <td className="p-3 border border-gray-300">{request.trainingBudget}</td>
+              <td className="p-3 border border-gray-300">{calculatePricePerDay(request)}</td>
               <td className="p-3 border border-gray-300">{typeof request.companyId === 'object' ? request.companyId.companyName : request.companyId}</td>
               <td className="p-3 border border-gray-300">
                 <button className="px-2 py-1 bg-red-500 text-white rounded" onClick={() => console.log('Reject')}>
@@ -63,7 +80,7 @@ function BusinessRequestsDetails() {
           ))}
         </tbody>
       </table>
- 
+
       {/* Pagination */}
       <div className="mt-4 flex justify-end">
         <button

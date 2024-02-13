@@ -10,8 +10,8 @@ function AdminDashboard() {
       <TrainersDetails />
       <CompaniesDetails />
       <TrainersFilterPage/>
-      <PurchaseOrderComponent />
       <BusinessRequestsDetails/>
+      <PurchaseOrderComponent />
 
     </div>
   );
