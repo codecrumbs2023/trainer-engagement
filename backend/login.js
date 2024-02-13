@@ -55,8 +55,16 @@ const businessRequestSchema = new mongoose.Schema({
   trainingBudget: { type: Number, required: true }
 });
 
+const purchaseOrdersSchema = new mongoose.Schema({
+  businessId: { type: String, required: true },
+  trainerEmail: { type: String, required: true },
+  amount: { type: Number, required: true },
+  status: { type: Boolean, required: true },
+  endDate: { type: Date, required: true },
+  startDate: { type: Date, required: true },
+});
 
-const Trainer = mongoose.model("Trainer", trainerSchema);
+const PurchaseOrder = mongoose.model('PurchaseOrder', purchaseOrdersSchema);const Trainer = mongoose.model("Trainer", trainerSchema);
 const Company = mongoose.model("Company", companySchema);
 const BusinessRequest = mongoose.model('BusinessRequest', businessRequestSchema);
 
@@ -325,6 +333,31 @@ app.get('/businessrequests', async (req, res) => {
   } catch (error) {
     console.error('Error fetching data:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST route to store data in the purchaseorder collection
+app.post("/purchase-orders", async (req, res) => {
+  // Extract data from the request body
+  const { businessId, trainerEmail, amount, status, startDate, endDate } = req.body;
+
+  // Create a new PurchaseOrder instance
+  const newPurchaseOrder = new PurchaseOrder({
+    businessId,
+    trainerEmail,
+    amount, // Include calculatedBudget
+    status,
+    startDate,
+    endDate
+  });
+
+  // Save the new PurchaseOrder instance to the database
+  try {
+    const savedPurchaseOrder = await newPurchaseOrder.save();
+    res.status(201).json(savedPurchaseOrder);
+  } catch (error) {
+    console.error("Error creating purchase order:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
