@@ -44,8 +44,22 @@ const companySchema = new mongoose.Schema({
   role: { type: String, default: "company" },
 });
 
+const businessRequestSchema = new mongoose.Schema({
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
+  batchName: { type: String, required: true },
+  technology: { type: String, required: true },
+  numberOfTrainees: { type: Number, required: true },
+  durationOfTraining: { type: String, required: true },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  trainingBudget: { type: Number, required: true }
+});
+
+
 const Trainer = mongoose.model("Trainer", trainerSchema);
 const Company = mongoose.model("Company", companySchema);
+const BusinessRequest = mongoose.model('BusinessRequest', businessRequestSchema);
+
 
 app.use(cors());
 app.use(express.json());
@@ -193,6 +207,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
+
 //modification for jwt token to be done till here
 
 // Modify the admin-dashboard route to apply authentication middleware
@@ -301,6 +316,18 @@ app.delete('/companies/:id', async (req, res) => {
       res.status(500).json({ message: "Error deleting company", error });
   }
 });
+
+app.get('/businessrequests', async (req, res) => {
+  try {
+    // Fetch data from businessrequest collection and populate companyName from companies collection
+    const data = await BusinessRequest.find().populate('companyId', 'companyName');
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 
 app.listen(PORT, () => {
